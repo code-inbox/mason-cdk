@@ -12,7 +12,7 @@ const project = new CdklabsConstructLibrary({
   name: 'mason',
   private: false,
   repositoryUrl: 'https://github.com/magibell-io/mason.git',
-  bundledDeps: ['diff', 'decamelize', 'yaml', 'fast-json-patch'],
+  bundledDeps: ['diff', '@types/diff', 'decamelize', 'yaml', 'fast-json-patch'],
   peerDeps: ['aws-cdk-lib'],
   deps: ['cdk-pipelines-github'] /* Runtime dependencies of this module. */,
   description:

@@ -76,6 +76,7 @@
     "constructs": "^10.0.46"
   },
   "dependencies": {
+    "@types/diff": "^5.0.5",
     "cdk-pipelines-github": "^0.4.103",
     "decamelize": "^6.0.0",
     "diff": "^5.1.0",
@@ -83,6 +84,7 @@
     "yaml": "^2.3.2"
   },
   "bundledDependencies": [
+    "@types/diff",
     "decamelize",
     "diff",
     "fast-json-patch",

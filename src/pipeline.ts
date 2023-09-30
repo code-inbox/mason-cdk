@@ -3,6 +3,7 @@ import * as path from 'path';
 import { Stage } from 'aws-cdk-lib';
 import { EnvironmentPlaceholders } from 'aws-cdk-lib/cx-api';
 import {
+  AddStageOpts,
   PipelineBase,
   ShellStep,
   StackAsset,
@@ -18,7 +19,6 @@ import {
   isGraph,
 } from 'aws-cdk-lib/pipelines/lib/helpers-internal';
 import {
-  AddGitHubStageOptions,
   AwsCredentials,
   AwsCredentialsProvider,
   ContainerOptions,
@@ -27,6 +27,7 @@ import {
   Job as GitHubJob,
   GitHubWorkflowProps,
   JobPermission,
+  JobSettings,
   JobStep,
   JobStepOutput,
   JobSettings as OriginalJobSettings,
@@ -37,6 +38,7 @@ import {
 import { Construct } from 'constructs';
 import decamelize from 'decamelize';
 import * as diff from 'diff';
+import { GitHubCommonProps } from 'cdk-pipelines-github/lib/github-common';
 
 const CDKOUT_ARTIFACT = 'cdk.out';
 const ASSET_HASH_NAME = 'asset-hash';
@@ -45,49 +47,67 @@ const SHA_STRING =
 const CACHE_PREFIX =
   "${{ github.event_name == 'workflow_run' && '-production-' ||  ''}}";
 
-export interface JobSettings extends OriginalJobSettings {
+export interface ExtendedJobSettings extends OriginalJobSettings {
   /**
    * Timeout in minutes after which this job will be canceled if it hasn't finished.
    */
   readonly timeoutMinutes?: number;
 }
 
-export interface MasonGitHubWorkflowProps extends GitHubWorkflowProps {
-  /**
-   * Job level settings that will be applied to all jobs in the workflow,
-   * including synth and asset deploy jobs. Currently, the only valid settings
-   * are 'if' and 'timeoutMinutes'. You can use this to run jobs only in specific repositories.
-   *
-   * @see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-only-run-job-for-specific-repository
-   */
-  readonly jobSettings?: JobSettings;
-
+export interface IMasonNamer {
   /**
    * Use this function to set the display name of stack deployment jobs. By default, the name of the job will be the
    * name of the stack. Sometimes we may want the name to be different. For example, if the stack name is dynamic but
    * the pipeline code should remain static.
    *
    * This will be used for stack delpoyment job names and its display name.
+   *
+   * @return string stack display name or undefined for default
    */
-  readonly stackDisplayNamer?: (
-    node: AGraphNode,
-    stack: StackDeployment
-  ) => string;
+  stackDisplayName(originalName: string, stack: StackDeployment): string | undefined;
 
   /**
    * Use this function to override deployed stack names. This is useful when the stack name is dynamic but the pipeline
    * code should remain static.
+   *
+   * @return string stack name or undefined for default
    */
-  readonly stackNameOverrider?: (
-    node: AGraphNode,
-    stack: StackDeployment
-  ) => string;
+  stackName(originalName: string, stack: StackDeployment): string | undefined;
 
   /**
    * Use this function to override GitHub Actions job names. This is useful when the job name is dynamic but the
    * pipeline code should remain static.
+   *
+   * @return string job name or undefined for default
    */
-  readonly gitHubActionJobNamer?: (node: AGraphNode, step: Step) => string;
+  gitHubActionJobName(originalName: string, step: Step): string | undefined;
+}
+
+export interface MasonGitHubWorkflowProps extends GitHubWorkflowProps {
+  /**
+   * Additional job level settings that will be applied to all jobs in the workflow,
+   * including synth and asset deploy jobs. Currently, the only valid setting
+   * is 'timeoutMinutes'. You can use this to run jobs only in specific repositories.
+   *
+   * @see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-only-run-job-for-specific-repository
+   */
+  readonly extendedJobSettings?: ExtendedJobSettings;
+
+  /**
+   * Optional object that can name jobs and stacks. This can be useful to avoid name conflicts.
+   */
+  readonly namer?: IMasonNamer;
+}
+
+export interface MasonAddGitHubStageOptions extends AddStageOpts, GitHubCommonProps {
+  /**
+   * Additional job level settings that will be applied to all jobs in the workflow,
+   * including synth and asset deploy jobs. Currently, the only valid setting
+   * is 'timeoutMinutes'. You can use this to run jobs only in specific repositories.
+   *
+   * @see https://docs.github.com/en/actions/using-workflows/workflow-syntax-for-github-actions#example-only-run-job-for-specific-repository
+   */
+  readonly extendedJobSettings?: ExtendedJobSettings;
 }
 
 /**
@@ -112,19 +132,8 @@ export class MasonGitHubWorkflow extends PipelineBase {
   private readonly runner: Runner;
   private readonly stackProperties: Record<string, Record<string, any>> = {};
   private readonly jobSettings?: JobSettings;
-
-  private readonly stackDisplayNamer?: (
-    node: AGraphNode,
-    stack: StackDeployment
-  ) => string;
-  private readonly stackNameOverrider?: (
-    node: AGraphNode,
-    stack: StackDeployment
-  ) => string;
-  private readonly gitHubActionJobNamer?: (
-    node: AGraphNode,
-    step: Step
-  ) => string;
+  private readonly extendedJobSettings?: ExtendedJobSettings;
+  private readonly namer?: IMasonNamer;
 
   constructor(scope: Construct, id: string, props: MasonGitHubWorkflowProps) {
     super(scope, id, props);
@@ -135,6 +144,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
     this.preBuildSteps = props.preBuildSteps ?? [];
     this.postBuildSteps = props.postBuildSteps ?? [];
     this.jobSettings = props.jobSettings;
+    this.extendedJobSettings = props.extendedJobSettings;
 
     this.awsCredentials = this.getAwsCredentials(props);
 
@@ -163,9 +173,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
     this.runner = props.runner ?? Runner.UBUNTU_LATEST;
     this.publishAssetsAuthRegion = props.publishAssetsAuthRegion ?? 'us-west-2';
 
-    this.stackDisplayNamer = props.stackDisplayNamer;
-    this.stackNameOverrider = props.stackNameOverrider;
-    this.gitHubActionJobNamer = props.gitHubActionJobNamer;
+    this.namer = props.namer;
   }
 
   /**
@@ -207,7 +215,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
    */
   public addStageWithGitHubOptions(
     stage: Stage,
-    options?: AddGitHubStageOptions,
+    options?: MasonAddGitHubStageOptions,
   ): StageDeployment {
     const stageDeployment = this.addStage(stage, options);
 
@@ -215,7 +223,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
     const stacks = stageDeployment.stacks;
     this.addStackProps(stacks, 'environment', options?.gitHubEnvironment);
     this.addStackProps(stacks, 'capabilities', options?.stackCapabilities);
-    this.addStackProps(stacks, 'settings', options?.jobSettings);
+    this.addStackProps(stacks, 'settings', { ...options?.jobSettings, ...options?.extendedJobSettings });
 
     return stageDeployment;
   }
@@ -466,6 +474,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
       definition: {
         name: `Publish Assets ${jobId}`,
         ...this.jobSettings,
+        ...this.extendedJobSettings,
         needs: this.renderDependencies(node),
         permissions: {
           contents: JobPermission.READ,
@@ -528,9 +537,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
     };
 
     const params: Record<string, any> = {
-      'name': this.stackNameOverrider
-        ? this.stackNameOverrider(node, stack)
-        : stack.stackName,
+      'name': this.namer?.stackName(stack.stackName, stack) ?? stack.stackName,
       'template': replaceAssetHash(resolve(stack.templateUrl)),
       'no-fail-on-empty-changeset': '1',
     };
@@ -549,16 +556,13 @@ export class MasonGitHubWorkflow extends PipelineBase {
       : undefined;
 
     return {
-      id: this.stackDisplayNamer
-        ? `${this.stackDisplayNamer(node, stack)}-Deploy`
+      id: this.namer?.stackDisplayName(node.uniqueId, stack)
+        ? `${this.namer?.stackDisplayName(node.uniqueId, stack)}-Deploy`
         : node.uniqueId,
       definition: {
-        name: `Deploy ${
-          this.stackDisplayNamer
-            ? `${this.stackDisplayNamer(node, stack)}`
-            : node.uniqueId
-        }`,
+        name: `Deploy ${this.namer?.stackDisplayName(node.uniqueId, stack) ?? node.uniqueId}`,
         ...this.jobSettings,
+        ...this.extendedJobSettings,
         ...this.stackProperties[stack.stackArtifactId]?.settings,
         permissions: {
           contents: JobPermission.READ,
@@ -622,6 +626,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
       definition: {
         name: 'Synthesize',
         ...this.jobSettings,
+        ...this.extendedJobSettings,
         permissions: {
           contents: JobPermission.READ,
           pullRequests: JobPermission.WRITE,
@@ -726,6 +731,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
       definition: {
         name: step.id,
         ...this.jobSettings,
+        ...this.extendedJobSettings,
         permissions: {
           contents: JobPermission.READ,
           pullRequests: JobPermission.WRITE,
@@ -752,12 +758,11 @@ export class MasonGitHubWorkflow extends PipelineBase {
     step: GitHubActionStep,
   ): Job {
     return {
-      id: this.gitHubActionJobNamer
-        ? this.gitHubActionJobNamer(node, step)
-        : node.uniqueId,
+      id: this.namer?.gitHubActionJobName(node.uniqueId, step) ?? node.uniqueId,
       definition: {
         name: step.id,
         ...this.jobSettings,
+        ...this.extendedJobSettings,
         permissions: {
           contents: JobPermission.WRITE,
           idToken: this.awsCredentials.jobPermission(),
@@ -866,12 +871,18 @@ export class MasonGitHubWorkflow extends PipelineBase {
     }
 
     return deps.map((x) => {
-      if (this.stackDisplayNamer && x.data?.type === 'execute') {
-        return `${this.stackDisplayNamer(x, x.data.stack)}-Deploy`;
+      if (x.data?.type === 'execute') {
+        const displayName = this.namer?.stackDisplayName(x.uniqueId, x.data.stack);
+        if (displayName) {
+          return `${displayName}-Deploy`;
+        }
       }
 
-      if (this.gitHubActionJobNamer && x.data?.type == 'step') {
-        return this.gitHubActionJobNamer(x, x.data.step);
+      if (x.data?.type == 'step') {
+        const jobName = this.namer?.gitHubActionJobName(x.uniqueId, x.data.step);
+        if (jobName) {
+          return jobName;
+        }
       }
 
       return x.uniqueId;
@@ -914,26 +925,6 @@ function snakeCaseKeys<T = unknown>(obj: T, sep = '-'): T {
     result[decamelize(k, { separator: sep })] = v;
   }
   return result as any;
-}
-
-/**
- * Names of secrets for AWS credentials.
- */
-interface AwsCredentialsSecrets {
-  /**
-   * @default "AWS_ACCESS_KEY_ID"
-   */
-  readonly accessKeyId?: string;
-
-  /**
-   * @default "AWS_SECRET_ACCESS_KEY"
-   */
-  readonly secretAccessKey?: string;
-
-  /**
-   * @default - no session token is used
-   */
-  readonly sessionToken?: string;
 }
 
 function* flatten<A>(xs: Iterable<A[]>): IterableIterator<A> {

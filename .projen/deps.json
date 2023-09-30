@@ -111,6 +111,10 @@
       "type": "build"
     },
     {
+      "name": "@types/diff",
+      "type": "bundled"
+    },
+    {
       "name": "decamelize",
       "type": "bundled"
     },

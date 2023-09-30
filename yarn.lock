@@ -928,6 +928,11 @@
   dependencies:
     "@babel/types" "^7.20.7"
 
+"@types/diff@^5.0.5":
+  version "5.0.5"
+  resolved "https://registry.yarnpkg.com/@types/diff/-/diff-5.0.5.tgz#5fea9742557f5ba76c652e35f6f8461ad9336cae"
+  integrity sha512-rt7WqM1bWwKJMRxlB5Rhke56UN21Bqwp1ILER31bafTivcapYdfhtPd5xRWfhf08yjPxoDcfjVkkECdRwFe7EA==
+
 "@types/glob@^8.0.0":
   version "8.1.0"
   resolved "https://registry.yarnpkg.com/@types/glob/-/glob-8.1.0.tgz#b63e70155391b0584dce44e7ea25190bbc38f2fc"

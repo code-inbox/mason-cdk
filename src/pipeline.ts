@@ -36,7 +36,7 @@ import {
   YamlFile,
 } from 'cdk-pipelines-github';
 import { Construct } from 'constructs';
-import decamelize from 'decamelize';
+import * as decamelize from 'decamelize';
 import * as diff from 'diff';
 import { GitHubCommonProps } from 'cdk-pipelines-github/lib/github-common';
 

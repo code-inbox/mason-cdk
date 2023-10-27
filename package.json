@@ -1,7 +1,6 @@
 {
   "name": "@codeinbox/mason",
   "description": "review pipelines with cdk and GitHub",
-  "private": false,
   "repository": {
     "type": "git",
     "url": "https://github.com/code-inbox/mason-cdk.git"
@@ -50,7 +49,7 @@
     "@types/node": "^16",
     "@typescript-eslint/eslint-plugin": "^6",
     "@typescript-eslint/parser": "^6",
-    "aws-cdk-lib": "2.9.0",
+    "aws-cdk-lib": "2.68.0",
     "cdk-pipelines-github": "^0.4.103",
     "cdklabs-projen-project-types": "^0.1.163",
     "constructs": "10.0.46",
@@ -73,13 +72,13 @@
     "typescript": "^5.2.2"
   },
   "peerDependencies": {
-    "aws-cdk-lib": "^2.9.0",
+    "aws-cdk-lib": "^2.68.0",
+    "cdk-pipelines-github": "^0.4.103",
     "constructs": "^10.0.46"
   },
   "dependencies": {
     "@types/diff": "^5.0.5",
-    "cdk-pipelines-github": "^0.4.103",
-    "decamelize": "^6.0.0",
+    "decamelize": "^5.0.0",
     "diff": "^5.1.0",
     "fast-json-patch": "^3.1.1",
     "yaml": "^2.3.2"
@@ -99,7 +98,10 @@
   },
   "main": "lib/index.js",
   "license": "Apache-2.0",
-  "version": "0.0.2",
+  "publishConfig": {
+    "access": "public"
+  },
+  "version": "0.0.0",
   "jest": {
     "testMatch": [
       "<rootDir>/src/**/__tests__/**/*.ts?(x)",

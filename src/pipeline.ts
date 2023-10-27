@@ -35,10 +35,10 @@ import {
   WorkflowTriggers,
   YamlFile,
 } from 'cdk-pipelines-github';
+import { GitHubCommonProps } from 'cdk-pipelines-github/lib/github-common';
 import { Construct } from 'constructs';
 import * as decamelize from 'decamelize';
 import * as diff from 'diff';
-import { GitHubCommonProps } from 'cdk-pipelines-github/lib/github-common';
 
 const CDKOUT_ARTIFACT = 'cdk.out';
 const ASSET_HASH_NAME = 'asset-hash';

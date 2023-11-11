@@ -805,7 +805,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
 
     return [
       {
-        uses: 'docker/login-action@v1',
+        uses: 'docker/login-action@v3',
         with: params,
       },
     ];

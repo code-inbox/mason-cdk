@@ -1,5 +1,6 @@
 import { CdklabsConstructLibrary } from 'cdklabs-projen-project-types';
-import { JsonPatch } from 'projen/lib/json-patch';
+import { JsonPatch } from 'projen';
+
 const project = new CdklabsConstructLibrary({
   projenrcTs: true,
   author: 'Hana Mohan',

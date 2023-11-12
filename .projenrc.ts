@@ -1,23 +1,24 @@
 import { CdklabsConstructLibrary } from 'cdklabs-projen-project-types';
-import { JsonPatch } from 'projen/lib/json-patch';
+import { JsonPatch } from 'projen';
+
 const project = new CdklabsConstructLibrary({
   projenrcTs: true,
   author: 'Hana Mohan',
   authorAddress: 'unamashana@gmail.com',
-  cdkVersion: '2.9.0',
+  cdkVersion: '2.68.0',
   defaultReleaseBranch: 'main',
-  devDeps: ['cdklabs-projen-project-types', 'cdk-pipelines-github'],
+  devDeps: ['cdklabs-projen-project-types', 'aws-cdk-lib'],
   jsiiVersion: '~5.0.0',
   constructsVersion: '10.0.46',
   name: 'mason',
   private: false,
-  repositoryUrl: 'https://github.com/magibell-io/mason.git',
-  bundledDeps: ['diff', '@types/diff', 'decamelize', 'yaml', 'fast-json-patch'],
-  peerDeps: ['aws-cdk-lib'],
-  deps: ['cdk-pipelines-github'] /* Runtime dependencies of this module. */,
+  repositoryUrl: 'https://github.com/code-inbox/mason-cdk.git',
+  bundledDeps: ['diff', '@types/diff', 'decamelize@^5.0.0', 'yaml', 'fast-json-patch'],
+  peerDeps: ['aws-cdk-lib', 'cdk-pipelines-github'],
+  deps: [] /* Runtime dependencies of this module. */,
   description:
     'review pipelines with cdk and GitHub' /* The description is just a string that helps people understand the purpose of the package. */,
-  packageName: 'mason' /* The "name" in package.json. */,
+  packageName: '@codeinbox/mason' /* The "name" in package.json. */,
 });
 
 // JSII sets this to `false` so we need to be compatible

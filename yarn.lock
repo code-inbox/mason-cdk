@@ -1395,13 +1395,13 @@ case@1.6.3, case@^1.6.3:
   integrity sha512-mzDSXIPaFwVDvZAHqZ9VlbyF4yyXRuX6IvB06WvPYkqJVO24kX1PPhv9bfpKNFZyxYFmmgo03HUiD8iklmJYRQ==
 
 cdk-pipelines-github@^0.4.104:
-  version "0.4.104"
-  resolved "https://registry.yarnpkg.com/cdk-pipelines-github/-/cdk-pipelines-github-0.4.104.tgz#28ea15e9d418764e29dbde171919d79bdc8a6223"
-  integrity sha512-+1hgFiszVGiL7PP3JASOTW+DEkeyMCuWmMPXL2+IqlZ40KCPqBr34MCxHTdYC/mrCWzo+DlWrScbXqbcj72KnA==
+  version "0.4.105"
+  resolved "https://registry.yarnpkg.com/cdk-pipelines-github/-/cdk-pipelines-github-0.4.105.tgz#7899dd6398527225bba9394a885b73057817055e"
+  integrity sha512-s3h1jckNgt/S6S8ChbDnmaDGTn5EdlyztugGsd2jEXewcFlHXN8smrZ0bDJDeFRFm7zWDwW8ZObrLWRbdQwqSA==
   dependencies:
     decamelize "^5.0.1"
     fast-json-patch "^3.1.1"
-    yaml "^2.3.3"
+    yaml "^2.3.4"
 
 cdklabs-projen-project-types@^0.1.176:
   version "0.1.176"
@@ -5135,7 +5135,7 @@ yaml@1.10.2:
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-1.10.2.tgz#2301c5ffbf12b467de8da2333a459e29e7920e4b"
   integrity sha512-r3vXyErRCYJ7wg28yvBY5VSoAF8ZvlcW9/BwUzEtUsjvX/DKs24dIkuwjtuprwJJHsbyUbLApepYTR1BN4uHrg==
 
-yaml@^2.2.2, yaml@^2.3.3, yaml@^2.3.4:
+yaml@^2.2.2, yaml@^2.3.4:
   version "2.3.4"
   resolved "https://registry.yarnpkg.com/yaml/-/yaml-2.3.4.tgz#53fc1d514be80aabf386dc6001eb29bf3b7523b2"
   integrity sha512-8aAvwVUSHpfEqTQ4w/KMlf3HcRdt50E5ODIQJBw1fQ5RL34xabzxtUlzTXVqc4rkZsPbvrXKWnABCD7kWSmocA==

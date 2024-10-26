@@ -788,8 +788,8 @@ export class MasonGitHubWorkflow extends PipelineBase {
 
     if (dockerCredential.name === 'docker') {
       params = {
-        username: `\${{ secrets.${dockerCredential.usernameKey} }}`,
-        password: `\${{ secrets.${dockerCredential.passwordKey} }}`,
+        username: `\${{ secrets.${dockerCredential.username} }}`,
+        password: `\${{ secrets.${dockerCredential.password} }}`,
       };
     } else if (dockerCredential.name === 'ecr') {
       params = {
@@ -798,8 +798,8 @@ export class MasonGitHubWorkflow extends PipelineBase {
     } else {
       params = {
         registry: dockerCredential.registry,
-        username: `\${{ secrets.${dockerCredential.usernameKey} }}`,
-        password: `\${{ secrets.${dockerCredential.passwordKey} }}`,
+        username: `\${{ secrets.${dockerCredential.username} }}`,
+        password: `\${{ secrets.${dockerCredential.password} }}`,
       };
     }
 

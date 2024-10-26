@@ -15,8 +15,8 @@ import {
 import {
   AGraphNode,
   Graph,
-  PipelineGraph,
   isGraph,
+  PipelineGraph,
 } from 'aws-cdk-lib/pipelines/lib/helpers-internal';
 import {
   AwsCredentials,
@@ -31,11 +31,11 @@ import {
   JobStep,
   JobStepOutput,
   JobSettings as OriginalJobSettings,
-  Runner,
   WorkflowTriggers,
   YamlFile,
 } from 'cdk-pipelines-github';
 import { GitHubCommonProps } from 'cdk-pipelines-github/lib/github-common';
+import * as github from 'cdk-pipelines-github/lib/workflows-model';
 import { Construct } from 'constructs';
 import * as decamelize from 'decamelize';
 import * as diff from 'diff';
@@ -64,7 +64,10 @@ export interface IMasonNamer {
    *
    * @return string stack display name or undefined for default
    */
-  stackDisplayName(originalName: string, stack: StackDeployment): string | undefined;
+  stackDisplayName(
+    originalName: string,
+    stack: StackDeployment,
+  ): string | undefined;
 
   /**
    * Use this function to override deployed stack names. This is useful when the stack name is dynamic but the pipeline
@@ -99,7 +102,9 @@ export interface MasonGitHubWorkflowProps extends GitHubWorkflowProps {
   readonly namer?: IMasonNamer;
 }
 
-export interface MasonAddGitHubStageOptions extends AddStageOpts, GitHubCommonProps {
+export interface MasonAddGitHubStageOptions
+  extends AddStageOpts,
+    GitHubCommonProps {
   /**
    * Additional job level settings that will be applied to all jobs in the workflow,
    * including synth and asset deploy jobs. Currently, the only valid setting
@@ -129,7 +134,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
   private readonly postBuildSteps: JobStep[];
   private readonly jobOutputs: Record<string, JobStepOutput[]> = {};
   private readonly assetHashMap: Record<string, string> = {};
-  private readonly runner: Runner;
+  private readonly runner: github.Runner;
   private readonly stackProperties: Record<string, Record<string, any>> = {};
   private readonly jobSettings?: JobSettings;
   private readonly extendedJobSettings?: ExtendedJobSettings;
@@ -170,7 +175,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
       workflowDispatch: {},
     };
 
-    this.runner = props.runner ?? Runner.UBUNTU_LATEST;
+    this.runner = props.runner ?? github.Runner.UBUNTU_LATEST;
     this.publishAssetsAuthRegion = props.publishAssetsAuthRegion ?? 'us-west-2';
 
     this.namer = props.namer;
@@ -223,7 +228,10 @@ export class MasonGitHubWorkflow extends PipelineBase {
     const stacks = stageDeployment.stacks;
     this.addStackProps(stacks, 'environment', options?.gitHubEnvironment);
     this.addStackProps(stacks, 'capabilities', options?.stackCapabilities);
-    this.addStackProps(stacks, 'settings', { ...options?.jobSettings, ...options?.extendedJobSettings });
+    this.addStackProps(stacks, 'settings', {
+      ...options?.jobSettings,
+      ...options?.extendedJobSettings,
+    });
 
     return stageDeployment;
   }
@@ -310,7 +318,7 @@ export class MasonGitHubWorkflow extends PipelineBase {
       'cdk-pipelines-github:diffProtection',
     );
     const diffProtection =
-      contextValue === 'false' ? false : contextValue ?? true;
+      contextValue === 'false' ? false : (contextValue ?? true);
     if (diffProtection && process.env.GITHUB_WORKFLOW === this.workflowName) {
       if (
         !existsSync(this.workflowPath) ||
@@ -353,9 +361,8 @@ export class MasonGitHubWorkflow extends PipelineBase {
   private renderJobOutputs(outputs: JobStepOutput[]) {
     const renderedOutputs: Record<string, string> = {};
     for (const output of outputs) {
-      renderedOutputs[
-        output.outputName
-      ] = `\${{ steps.${output.stepId}.outputs.${output.outputName} }}`;
+      renderedOutputs[output.outputName] =
+        `\${{ steps.${output.stepId}.outputs.${output.outputName} }}`;
     }
     return renderedOutputs;
   }
@@ -537,8 +544,8 @@ export class MasonGitHubWorkflow extends PipelineBase {
     };
 
     const params: Record<string, any> = {
-      'name': this.namer?.stackName(stack.stackName, stack) ?? stack.stackName,
-      'template': replaceAssetHash(resolve(stack.templateUrl)),
+      name: this.namer?.stackName(stack.stackName, stack) ?? stack.stackName,
+      template: replaceAssetHash(resolve(stack.templateUrl)),
       'no-fail-on-empty-changeset': '1',
     };
 
@@ -560,7 +567,9 @@ export class MasonGitHubWorkflow extends PipelineBase {
         ? `${this.namer?.stackDisplayName(node.uniqueId, stack)}-Deploy`
         : node.uniqueId,
       definition: {
-        name: `Deploy ${this.namer?.stackDisplayName(node.uniqueId, stack) ?? node.uniqueId}`,
+        name: `Deploy ${
+          this.namer?.stackDisplayName(node.uniqueId, stack) ?? node.uniqueId
+        }`,
         ...this.jobSettings,
         ...this.extendedJobSettings,
         ...this.stackProperties[stack.stackArtifactId]?.settings,
@@ -571,9 +580,9 @@ export class MasonGitHubWorkflow extends PipelineBase {
         },
         ...(this.stackProperties[stack.stackArtifactId]?.environment
           ? {
-            environment:
+              environment:
                 this.stackProperties[stack.stackArtifactId].environment,
-          }
+            }
           : {}),
         needs: this.renderDependencies(node),
         runsOn: this.runner.runsOn,
@@ -614,11 +623,11 @@ export class MasonGitHubWorkflow extends PipelineBase {
     const installSteps =
       step.installCommands.length > 0
         ? [
-          {
-            name: 'Install',
-            run: step.installCommands.join('\n'),
-          },
-        ]
+            {
+              name: 'Install',
+              run: step.installCommands.join('\n'),
+            },
+          ]
         : [];
 
     return {
@@ -688,9 +697,8 @@ export class MasonGitHubWorkflow extends PipelineBase {
         outputName: ref.outputName,
         stepId: 'Deploy',
       });
-      envVariables[
-        envName
-      ] = `\${{ needs.${jobId}.outputs.${ref.outputName} }}`;
+      envVariables[envName] =
+        `\${{ needs.${jobId}.outputs.${ref.outputName} }}`;
     }
 
     const downloadInputs = new Array<JobStep>();
@@ -719,11 +727,11 @@ export class MasonGitHubWorkflow extends PipelineBase {
     const installSteps =
       step.installCommands.length > 0
         ? [
-          {
-            name: 'Install',
-            run: step.installCommands.join('\n'),
-          },
-        ]
+            {
+              name: 'Install',
+              run: step.installCommands.join('\n'),
+            },
+          ]
         : [];
 
     return {
@@ -872,14 +880,20 @@ export class MasonGitHubWorkflow extends PipelineBase {
 
     return deps.map((x) => {
       if (x.data?.type === 'execute') {
-        const displayName = this.namer?.stackDisplayName(x.uniqueId, x.data.stack);
+        const displayName = this.namer?.stackDisplayName(
+          x.uniqueId,
+          x.data.stack,
+        );
         if (displayName) {
           return `${displayName}-Deploy`;
         }
       }
 
       if (x.data?.type == 'step') {
-        const jobName = this.namer?.gitHubActionJobName(x.uniqueId, x.data.step);
+        const jobName = this.namer?.gitHubActionJobName(
+          x.uniqueId,
+          x.data.step,
+        );
         if (jobName) {
           return jobName;
         }

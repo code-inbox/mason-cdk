@@ -1,6 +1,10 @@
 {
   "dependencies": [
     {
+      "name": "@ianvs/prettier-plugin-sort-imports",
+      "type": "build"
+    },
+    {
       "name": "@types/jest",
       "type": "build"
     },
@@ -73,6 +77,10 @@
     {
       "name": "npm-check-updates",
       "version": "^16",
+      "type": "build"
+    },
+    {
+      "name": "prettier",
       "type": "build"
     },
     {

@@ -7,7 +7,12 @@ const project = new CdklabsConstructLibrary({
   authorAddress: 'unamashana@gmail.com',
   cdkVersion: '2.164.1',
   defaultReleaseBranch: 'main',
-  devDeps: ['cdklabs-projen-project-types', 'aws-cdk-lib'],
+  devDeps: [
+    'cdklabs-projen-project-types',
+    'aws-cdk-lib',
+    '@ianvs/prettier-plugin-sort-imports',
+    'prettier',
+  ],
   jsiiVersion: '~5.5.0',
   constructsVersion: '10.4.2',
   name: 'mason',
@@ -21,9 +26,11 @@ const project = new CdklabsConstructLibrary({
     'fast-json-patch',
   ],
   peerDeps: ['aws-cdk-lib', 'cdk-pipelines-github'],
+  depsUpgrade: true,
   deps: [] /* Runtime dependencies of this module. */,
+
   description:
-    'review pipelines with cdk and GitHub' /* The description is just a string that helps people understand the purpose of the package. */,
+        'review pipelines with cdk and GitHub' /* The description is just a string that helps people understand the purpose of the package. */,
   packageName: '@codeinbox/mason' /* The "name" in package.json. */,
 });
 

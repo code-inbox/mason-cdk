@@ -8,7 +8,7 @@ const project = new CdklabsConstructLibrary({
   cdkVersion: '2.164.1',
   defaultReleaseBranch: 'main',
   devDeps: ['cdklabs-projen-project-types', 'aws-cdk-lib'],
-  jsiiVersion: '~5.0.0',
+  jsiiVersion: '~5.5.0',
   constructsVersion: '10.4.2',
   name: 'mason',
   private: false,

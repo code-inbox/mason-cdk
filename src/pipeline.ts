@@ -37,7 +37,9 @@ import * as github from 'cdk-pipelines-github/lib/workflows-model';
 import { Construct } from 'constructs';
 import * as decamelize from 'decamelize';
 import * as diff from 'diff';
+// eslint-disable-next-line import/order
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from 'fs';
+// eslint-disable-next-line import/order
 import * as path from 'path';
 
 const CDKOUT_ARTIFACT = 'cdk.out';

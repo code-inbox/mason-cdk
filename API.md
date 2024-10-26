@@ -178,7 +178,7 @@ public stepsToConfigureAws(region: string, assumeRoleArn?: string): JobStep[]
 
 ---
 
-##### ~~`isConstruct`~~ <a name="isConstruct" id="@codeinbox/mason.MasonGitHubWorkflow.isConstruct"></a>
+##### `isConstruct` <a name="isConstruct" id="@codeinbox/mason.MasonGitHubWorkflow.isConstruct"></a>
 
 ```typescript
 import { MasonGitHubWorkflow } from '@codeinbox/mason'
@@ -187,6 +187,20 @@ MasonGitHubWorkflow.isConstruct(x: any)
 ```
 
 Checks if `x` is a construct.
+
+Use this method instead of `instanceof` to properly detect `Construct`
+instances, even when the construct library is symlinked.
+
+Explanation: in JavaScript, multiple copies of the `constructs` library on
+disk are seen as independent, completely different libraries. As a
+consequence, the class `Construct` in each copy of the `constructs` library
+is seen as a different class, and an instance of one class will not test as
+`instanceof` the other class. `npm install` will not create installations
+like this, but users may manually symlink construct libraries together or
+use a monorepo tool: in those cases, multiple copies of the `constructs`
+library can be accidentally installed, and `instanceof` will behave
+unpredictably. It is safest to avoid using `instanceof`, and using
+this type-testing method instead.
 
 ###### `x`<sup>Required</sup> <a name="x" id="@codeinbox/mason.MasonGitHubWorkflow.isConstruct.parameter.x"></a>
 
@@ -531,6 +545,8 @@ const masonGitHubWorkflowProps: MasonGitHubWorkflowProps = { ... }
 | <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.awsCreds">awsCreds</a></code> | <code>cdk-pipelines-github.AwsCredentialsProvider</code> | Configure provider for AWS credentials used for deployment. |
 | <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.buildContainer">buildContainer</a></code> | <code>cdk-pipelines-github.ContainerOptions</code> | Build container options. |
 | <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.cdkCliVersion">cdkCliVersion</a></code> | <code>string</code> | Version of the CDK CLI to use. |
+| <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.concurrency">concurrency</a></code> | <code>cdk-pipelines-github.ConcurrencyOptions</code> | GitHub workflow concurrency. |
+| <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.dockerAssetJobSettings">dockerAssetJobSettings</a></code> | <code>cdk-pipelines-github.DockerAssetJobSettings</code> | Job level settings applied to all docker asset publishing jobs in the workflow. |
 | <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.dockerCredentials">dockerCredentials</a></code> | <code>cdk-pipelines-github.DockerCredential[]</code> | The Docker Credentials to use to login. |
 | <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.gitHubActionRoleArn">gitHubActionRoleArn</a></code> | <code>string</code> | A role that utilizes the GitHub OIDC Identity Provider in your AWS account. |
 | <code><a href="#@codeinbox/mason.MasonGitHubWorkflowProps.property.jobSettings">jobSettings</a></code> | <code>cdk-pipelines-github.JobSettings</code> | Job level settings that will be applied to all jobs in the workflow, including synth and asset deploy jobs. |
@@ -616,6 +632,32 @@ public readonly cdkCliVersion: string;
 - *Default:* automatic
 
 Version of the CDK CLI to use.
+
+---
+
+##### `concurrency`<sup>Optional</sup> <a name="concurrency" id="@codeinbox/mason.MasonGitHubWorkflowProps.property.concurrency"></a>
+
+```typescript
+public readonly concurrency: ConcurrencyOptions;
+```
+
+- *Type:* cdk-pipelines-github.ConcurrencyOptions
+- *Default:* no concurrency settings
+
+GitHub workflow concurrency.
+
+---
+
+##### `dockerAssetJobSettings`<sup>Optional</sup> <a name="dockerAssetJobSettings" id="@codeinbox/mason.MasonGitHubWorkflowProps.property.dockerAssetJobSettings"></a>
+
+```typescript
+public readonly dockerAssetJobSettings: DockerAssetJobSettings;
+```
+
+- *Type:* cdk-pipelines-github.DockerAssetJobSettings
+- *Default:* no additional settings
+
+Job level settings applied to all docker asset publishing jobs in the workflow.
 
 ---
 

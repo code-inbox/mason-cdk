@@ -13,7 +13,13 @@ const project = new CdklabsConstructLibrary({
   name: 'mason',
   private: false,
   repositoryUrl: 'https://github.com/code-inbox/mason-cdk.git',
-  bundledDeps: ['diff', '@types/diff', 'decamelize@^5.0.0', 'yaml', 'fast-json-patch'],
+  bundledDeps: [
+    'diff',
+    '@types/diff',
+    'decamelize@^5.0.0',
+    'yaml',
+    'fast-json-patch',
+  ],
   peerDeps: ['aws-cdk-lib', 'cdk-pipelines-github'],
   deps: [] /* Runtime dependencies of this module. */,
   description:

@@ -1,36 +1,36 @@
 import { Stage } from 'aws-cdk-lib';
 import { EnvironmentPlaceholders } from 'aws-cdk-lib/cx-api';
 import {
-    AddStageOpts,
-    PipelineBase,
-    ShellStep,
-    StackAsset,
-    StackDeployment,
-    StackOutputReference,
-    StageDeployment,
-    Step,
+  AddStageOpts,
+  PipelineBase,
+  ShellStep,
+  StackAsset,
+  StackDeployment,
+  StackOutputReference,
+  StageDeployment,
+  Step,
 } from 'aws-cdk-lib/pipelines';
 import {
-    AGraphNode,
-    Graph,
-    isGraph,
-    PipelineGraph,
+  AGraphNode,
+  Graph,
+  isGraph,
+  PipelineGraph,
 } from 'aws-cdk-lib/pipelines/lib/helpers-internal';
 import {
-    AwsCredentials,
-    AwsCredentialsProvider,
-    ContainerOptions,
-    DockerCredential,
-    GitHubActionStep,
-    Job as GitHubJob,
-    GitHubWorkflowProps,
-    JobPermission,
-    JobSettings,
-    JobStep,
-    JobStepOutput,
-    JobSettings as OriginalJobSettings,
-    WorkflowTriggers,
-    YamlFile,
+  AwsCredentials,
+  AwsCredentialsProvider,
+  ContainerOptions,
+  DockerCredential,
+  GitHubActionStep,
+  Job as GitHubJob,
+  GitHubWorkflowProps,
+  JobPermission,
+  JobSettings,
+  JobStep,
+  JobStepOutput,
+  JobSettings as OriginalJobSettings,
+  WorkflowTriggers,
+  YamlFile,
 } from 'cdk-pipelines-github';
 import { GitHubCommonProps } from 'cdk-pipelines-github/lib/github-common';
 import * as github from 'cdk-pipelines-github/lib/workflows-model';
@@ -562,10 +562,10 @@ export class MasonGitHubWorkflow extends PipelineBase {
     };
 
     const params: Record<string, any> = {
-      "name":
+      'name':
                 this.namer?.stackName(stack.stackName, stack) ??
                 stack.stackName,
-      "template": replaceAssetHash(resolve(stack.templateUrl)),
+      'template': replaceAssetHash(resolve(stack.templateUrl)),
       'no-fail-on-empty-changeset': '1',
     };
 

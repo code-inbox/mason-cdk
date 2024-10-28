@@ -17,6 +17,7 @@ const project = new CdklabsConstructLibrary({
   constructsVersion: '10.4.2',
   name: 'mason',
   private: false,
+  releaseToNpm: true,
   repositoryUrl: 'https://github.com/code-inbox/mason-cdk.git',
   bundledDeps: [
     'diff',

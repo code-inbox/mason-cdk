@@ -1,6 +1,6 @@
 {
   "name": "@codeinbox/mason",
-  "description": "review pipelines with cdk and GitHub",
+  "description": "Review pipelines with cdk and GitHub",
   "repository": {
     "type": "git",
     "url": "https://github.com/code-inbox/mason-cdk.git"

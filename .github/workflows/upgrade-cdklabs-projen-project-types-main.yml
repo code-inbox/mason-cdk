@@ -18,13 +18,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          token: ${{ secrets.BELLA_ACTION_TOKEN }}
           ref: main
-      - name: Configure Git
-        run: |
-          git config --global user.email devs@magicbell.io
-          git config --global user.name 'MagicBella'
-
       - name: Setup Node.js
         uses: actions/setup-node@v4
       - name: Install dependencies
@@ -63,11 +57,15 @@ jobs:
           path: ${{ runner.temp }}
       - name: Apply patch
         run: '[ -s ${{ runner.temp }}/repo.patch ] && git apply ${{ runner.temp }}/repo.patch || echo "Empty patch. Skipping."'
+      - name: Set git identity
+        run: |-
+          git config user.name "MagicBella"
+          git config user.email "devs@magicbell.io"
       - name: Create Pull Request
         id: create-pr
         uses: peter-evans/create-pull-request@v6
         with:
-          token: ${{ secrets.BELLA_ACTION_TOKEN }}
+          token: ${{ secrets.PROJEN_GITHUB_TOKEN }}
           commit-message: |-
             chore(deps): upgrade cdklabs-projen-project-types
 

@@ -1,5 +1,6 @@
 import { CdklabsConstructLibrary } from 'cdklabs-projen-project-types';
 import { JsonPatch } from 'projen';
+import { NpmAccess } from 'projen/lib/javascript';
 
 const project = new CdklabsConstructLibrary({
   projenrcTs: true,
@@ -18,7 +19,7 @@ const project = new CdklabsConstructLibrary({
   name: 'mason',
   private: false,
   releaseToNpm: true,
-  repositoryUrl: 'https://github.com/code-inbox/mason-cdk.git',
+  repositoryUrl: 'https://github.com/magicbell/mason-cdk.git',
   bundledDeps: [
     'diff',
     '@types/diff',
@@ -31,8 +32,10 @@ const project = new CdklabsConstructLibrary({
   deps: [] /* Runtime dependencies of this module. */,
 
   description:
-        'review pipelines with cdk and GitHub' /* The description is just a string that helps people understand the purpose of the package. */,
-  packageName: '@codeinbox/mason' /* The "name" in package.json. */,
+    'review pipelines with cdk and GitHub' /* The description is just a string that helps people understand the purpose of the package. */,
+  packageName: '@magicbell/mason' /* The "name" in package.json. */,
+  npmAccess: NpmAccess.PUBLIC,
+  cdklabsPublishingDefaults: false,
 });
 
 // JSII sets this to `false` so we need to be compatible

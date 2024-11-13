@@ -3,6 +3,9 @@
 name: upgrade-cdklabs-projen-project-types-main
 on:
   workflow_dispatch: {}
+  push:
+    branches:
+      - feature/permissions
 jobs:
   upgrade:
     name: Upgrade
@@ -40,7 +43,8 @@ jobs:
     needs: upgrade
     runs-on: ubuntu-latest
     permissions:
-      contents: read
+      contents: write
+      pull-requests: write
     if: ${{ needs.upgrade.outputs.patch_created }}
     steps:
       - name: Checkout
